@@ -8,6 +8,11 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 
 
+darkBlueCode = '#011E92'
+darkBlue = colors.HexColor('#011E92')
+darkGreenCode = 'green'
+darkGreen = colors.HexColor('#5F8B1D')
+
 pageWidth = A4[0]
 pageHeight = A4[1]
 showRef = False
@@ -145,7 +150,7 @@ def drawHeader(c, invoiceData, topStart = 0):
     textY = pageHeight - topStart - titleFontSize
     for text in textToWrite:
         fontSize = text[1]
-        c.setFont("Helvetica", fontSize)
+        c.setFont("CustomFont", fontSize)
         textInterval = fontSize + 5
         c.drawRightString(textX, textY, text[0])
         textY -= textInterval
@@ -155,7 +160,7 @@ def drawHeader(c, invoiceData, topStart = 0):
     return textY
 
 def container(c, invoiceData, startYPoint) :
-    date_color = 'blue'
+    date_color = darkBlueCode
     endINvoiceNumberPoint = customer_invoices_number(c, invoiceData, startYPoint)
     endDatePoint = invoice_date(c, invoiceData, date_color, startYPoint=endINvoiceNumberPoint - 10)
     due_date(c, invoiceData, date_color, startYPoint=endINvoiceNumberPoint - 10)
@@ -166,9 +171,9 @@ def container(c, invoiceData, startYPoint) :
 
 def customer_invoices_number(c, invoiceData, startYPoint):
     fontSize = 20
-    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/noto.ttf'))
+    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/oswald.ttf'))
     c.setFont("CustomFont", fontSize)  
-    c.setFillColorRGB(0,0,0)
+    c.setFillColor(darkGreenCode)
     c.drawString(40,startYPoint,invoiceData['invoice']['title'])
     return startYPoint - 20
 
@@ -176,9 +181,10 @@ def invoice_date(c, invoiceData, date_color, startYPoint):
     if not invoiceData['invoice'].get('date'):
         return 
     fontSize = 11
-    c.setFont("Helvetica", fontSize)
+    c.setFont("CustomFont-Bold", fontSize)
     c.setFillColor(date_color)
-    c.drawString(40,startYPoint,"Invoice Date : ")
+    c.drawString(40,startYPoint,"Invoice Date : ", mode=(0))
+    c.setFont("CustomFont", fontSize)
     c.setFillColorRGB(0.5,0.5,0.5)
     c.drawString(40,startYPoint - fontSize - 7,invoiceData['invoice']['date'])
     return startYPoint - fontSize - 7
@@ -188,9 +194,10 @@ def due_date(c, invoiceData, date_color, startYPoint):
     if not invoiceData['invoice'].get('due_date'):
         return 
     fontSize = 11
-    c.setFont("Helvetica", fontSize)
+    c.setFont("CustomFont-Bold", fontSize)
     c.setFillColor(date_color)
     c.drawString(350,startYPoint,"Due Date : ")
+    c.setFont("CustomFont", fontSize)
     c.setFillColorRGB(0.5,0.5,0.5)
     c.drawString(350,startYPoint - fontSize - 7,invoiceData['invoice']['due_date'])
 
@@ -204,13 +211,15 @@ def description_table(c,invoiceData, description_table_color, startYPoint):
     # Style
     style = TableStyle([
                         ('FONT', (0, 0), (-1, -1), 'CustomFont'),
-                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.blue),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), darkBlue),
                         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
                         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'CustomFont-Bold'),
                         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
                         ('BACKGROUND', (5,1), (5,5), colors.fidblue),
-                        ('GRID', (0, 0), (-1, -1), 1, colors.lightgrey)])
+                        ('GRID', (0, 0), (-1, -1), 1, colors.lightgrey),
+                        
+                        ])
 
     table.setStyle(style)
 
@@ -224,7 +233,7 @@ def payment_communication(c, invoiceData, startYPoint):
         return
     fontSize = 11
     startYPoint = startYPoint - 11
-    c.setFont("Helvetica", fontSize)
+    c.setFont("CustomFont", fontSize)
     c.setFillColorRGB(0.5,0.5,0.5)
     c.drawString(40,startYPoint,invoiceData['invoice']['payment_communication']['title'])
     c.setFillColorRGB(0,0,0)
@@ -240,6 +249,7 @@ def amount_table(c, invoiceData, startYPoint):
     # Style
     totalIndex = len(data) - 1
     style = TableStyle([
+                        
                         ('FONT', (0, 0), (-1, -1), 'CustomFont'),
                         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
                         ('ALIGN', (0, 0), (-1, 0), 'LEFT'),
@@ -250,8 +260,9 @@ def amount_table(c, invoiceData, startYPoint):
                         ('TEXTCOLOR', (0, 1), (2, 2), colors.gray),
                         ('TEXTCOLOR', (1, 0), (1, 0), colors.gray),
                         ('BACKGROUND', (1,totalTaxLine), (1,totalTaxLine), colors.lightgrey),
-                        ('BACKGROUND', (0,totalIndex), (3,totalIndex), colors.ReportLabBlue),
+                        ('BACKGROUND', (0,totalIndex), (3,totalIndex), darkGreen),
                         ('TEXTCOLOR', (0,totalIndex), (3, totalIndex), colors.white),
+                        ('TEXTCOLOR', (0, 0), (0, 0), darkGreen),
                         # ('LINEBEFORE', (1, 0), (1, 0),1, colors.white),
                         ])
 
@@ -265,11 +276,11 @@ def amount_table(c, invoiceData, startYPoint):
 def amount_in_words(c, invoiceData, startYPoint):
     fontSize = 11
     startYPoint = startYPoint - 11
-    c.setFont("Helvetica", fontSize)
+    c.setFont("CustomFont", fontSize)
     c.setFillColorRGB(0.5,0.5,0.5)
     c.drawRightString(pageWidth - 20,startYPoint," Total amount in words :")
     fontSize = 9
-    c.setFont("Helvetica", fontSize)
+    c.setFont("CustomFont", fontSize)
     c.setFillColorRGB(0.5,0.5,0.5)
     startYPoint -= 12
     c.drawRightString(pageWidth - 20,startYPoint ,convert_amount_to_words(invoiceData['invoice']['total']))
@@ -278,7 +289,7 @@ def amount_in_words(c, invoiceData, startYPoint):
 
 def hello(c, invoiceData):
     c.translate(0,0)
-    c.setFont("Helvetica", 14)
+    c.setFont("CustomFont", 14)
     c.setStrokeColorRGB(0.2,0.5,0.3)
     c.setFillColorRGB(1,0,1)
 
@@ -289,12 +300,6 @@ def hello(c, invoiceData):
 
 
 
-def main():
-    c = canvas.Canvas("hello.pdf", pagesize=A4)
-    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/noto.ttf'))
-    hello(c)
-    c.showPage()
-    c.save()
 
 demo_data = {
 'companyDetail': [
@@ -321,7 +326,7 @@ demo_data = {
         'value': 'INV/2024/00001'
     },
     'amounts': [
-        ['Untaxed Amount',' ₹ 240.00 '],
+        ['Subtotal',' ₹ 240.00 '],
         ['SGST on ₹ 240.00',' ₹ 21.60 '],
         ['CGST on ₹ 240.00',' ₹ 21.60 '],
         ['Total',' ₹ 283.20 ']
@@ -337,9 +342,21 @@ def generate_pdf_content(invoiceData={}):
     buffer = BytesIO()
     # import pdb; pdb.set_trace();
     c = canvas.Canvas(buffer, pagesize=A4)
-    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/noto.ttf'))
+    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/oswald.ttf'))
+    pdfmetrics.registerFont(TTFont("CustomFont-Bold", f'{os.path.dirname(os.path.abspath(__file__))}/oswald-Bold.ttf'))
     hello(c, invoiceData or demo_data)
     c.save()
     pdf_content = buffer.getvalue()
     buffer.close()
     return pdf_content
+
+def main():
+    c = canvas.Canvas("hello.pdf", pagesize=A4)
+    pdfmetrics.registerFont(TTFont("CustomFont", f'{os.path.dirname(os.path.abspath(__file__))}/oswald.ttf'))
+    pdfmetrics.registerFont(TTFont("CustomFont-Bold", f'{os.path.dirname(os.path.abspath(__file__))}/oswald-Bold.ttf'))
+    hello(c, demo_data)
+    c.showPage()
+    c.save()
+
+
+main()

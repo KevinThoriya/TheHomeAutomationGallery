@@ -1,2 +1,3 @@
 print_invoice/invoice_print/hello.pdf
 print_invoice/invoice_print/image_cache/*
+print_invoice/.DS_Store
