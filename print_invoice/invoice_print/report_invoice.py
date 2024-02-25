@@ -357,6 +357,3 @@ def main():
     hello(c, demo_data)
     c.showPage()
     c.save()
-
-
-main()
