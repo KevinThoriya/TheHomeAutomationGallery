@@ -110,7 +110,7 @@ import os
 import hashlib
 import requests
 
-CACHE_DIR = 'image_cache'
+CACHE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/image_cache'
 
 def download_image(url):
     # Create cache directory if it doesn't exist
